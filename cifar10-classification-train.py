@@ -10,8 +10,17 @@ from torchvision import datasets
 class Config:
     MODEL_PATH = 'cifar10-classification.pth.tar'
     BATCH_SIZE = 100
-    EPOCHS = 250
-    ETA = 1e-3
+    EPOCHS = 100
+    ETA = 1e-2
+    TINY = False
+    NORMALIZE = True
+
+
+class Config_v1:
+    MODEL_PATH = 'cifar10-classification.pth.tar'
+    BATCH_SIZE = 100
+    EPOCHS = 100
+    ETA = 1e-2
     TINY = False
     NORMALIZE = True
 
@@ -180,9 +189,17 @@ def train_model(model, train_input, train_target,
 
 
 def compute_nb_errors(model, inputs, targets):
-    outputs = model(inputs)
-    _, predicted_classes = torch.max(outputs.data, 1)
-    nb_errors = targets.ne(predicted_classes).sum()
+    nb_errors = 0
+    batch_size = inputs.size(0) / 50
+
+    for b in range(0, inputs.size(0), batch_size):
+        batch_inputs = inputs.narrow(0, b, batch_size)
+        batch_targets = targets.narrow(0, b, batch_size)
+        
+        outputs = model(batch_inputs)
+        _, predicted_classes = torch.max(outputs.data, 1)
+        nb_errors += batch_targets.ne(predicted_classes).sum()
+
     return nb_errors
 
 
