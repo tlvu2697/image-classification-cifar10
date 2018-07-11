@@ -17,3 +17,6 @@ test_error|28.37%
 # Achitecture
 ## 1. v1
 ![alt text](https://gitlab.com/tlvu2697/image-classification-cifar10/raw/master/trained-model/v1/architecture.png "CNN Architecture v1")
+
+
+<img width=60% src="trained-model/v1/architecture.png">
