@@ -26,7 +26,7 @@ class config_v3:
     NORMALIZE = True
 
 class config_v4:
-    MODEL_PATH = 'trained-model/v4/v3.pth.tar'
+    MODEL_PATH = 'trained-model/v4/v4.pth.tar'
     LOG_PATH = 'trained-model/v4/train-v4.log'
     BATCH_SIZE = 100
     EPOCHS = 400
