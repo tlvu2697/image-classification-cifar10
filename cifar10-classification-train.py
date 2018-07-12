@@ -95,7 +95,7 @@ def train_model(model, train_input, train_target,
 
         accuracy = 100 - (nb_errors.float() * 100 / train_input.size(0))
         elapsed = datetime.now() - start_time_per_epoch
-        loggin.info('[{:5d}] Accuracy: {:3.2f}% - Loss: {:6.2f} - {}'.format(e + 1, accuracy, sum_loss, elapsed))
+        logging.info('[{:5d}] Accuracy: {:3.2f}% - Loss: {:6.2f} - {}'.format(e + 1, accuracy, sum_loss, elapsed))
     
     if model_path is not None:
         save_model(model, model_path)
@@ -118,7 +118,8 @@ def compute_nb_errors(model, inputs, targets):
 
 
 def main():
-    logging.basicConfig(filename=Config.LOG_PATH, format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    logging.basicConfig(filemode='w', filename=Config.LOG_PATH, format='%(levelname)s:%(message)s', level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler())
 
     if torch.cuda.is_available():
         logging.info('CUDA IS AVAILABLE. USING CUDA')
@@ -128,7 +129,7 @@ def main():
     train_input, train_target, test_input, test_target = load_data()
     train_input, train_target = Variable(train_input), Variable(train_target)
     test_input, test_target = Variable(test_input), Variable(test_target)
-    loggin.info('Data Loaded')
+    logging.info('Data Loaded')
 
     # Creating Model
     model = mymodels.create_model('v1')
@@ -138,10 +139,10 @@ def main():
 
     start_time = datetime.now()
     train_model(model, train_input, train_target, model_path=Config.MODEL_PATH)
-    logging.info('Elapsed time:', datetime.now() - start_time)
+    logging.info('Elapsed time: {}'.format(datetime.now() - start_time))
 
     nb_errors = compute_nb_errors(model, test_input, test_target)
-    loggin.info('Test error: {:.02f}% {:d} / {:d}'.format(100*nb_errors.float() / test_input.size(0), nb_errors, test_input.size(0)))
+    logging.info('Test error: {:.02f}% {:d} / {:d}'.format(100*nb_errors.float() / test_input.size(0), nb_errors, test_input.size(0)))
 
 
 if __name__ == '__main__':
