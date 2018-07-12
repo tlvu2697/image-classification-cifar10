@@ -17,10 +17,10 @@
 )
 
 (classifier): Sequential (
-    (0): BatchNorm1d (1024)
+    (0): DropOut (0.5)
     (1): Linear (1024 -> 2048)
-    (2): BatchNorm1d (2048)
+    (2): DropOut (0.5)
     (3): Linear (2048 -> 512)
-    (4): BatchNorm1d (512)
+    (4): DropOut (0.5)
     (5): Linear (512 -> 10)
 )

@@ -1,28 +1,13 @@
 import os
 import torch
+import logging
 from torch import Tensor, nn, optim
 from torch.autograd import Variable
 from torch.nn import functional as F
 from datetime import datetime
 from torchvision import datasets
-
-
-class Config:
-    MODEL_PATH = 'cifar10-classification.pth.tar'
-    BATCH_SIZE = 100
-    EPOCHS = 100
-    ETA = 1e-2
-    TINY = False
-    NORMALIZE = True
-
-
-class Config_v1:
-    MODEL_PATH = 'cifar10-classification.pth.tar'
-    BATCH_SIZE = 100
-    EPOCHS = 100
-    ETA = 1e-2
-    TINY = False
-    NORMALIZE = True
+from config import config_v1 as Config
+import model as mymodels
 
 
 def load_data(tiny=Config.TINY, normalize=Config.NORMALIZE):
@@ -50,7 +35,7 @@ def load_data(tiny=Config.TINY, normalize=Config.NORMALIZE):
 
     # Reduce Dataset
     if tiny:
-        print('** Reduce the data-set to the tiny setup (1000 samples)')
+        logging.info('** Reduce the data-set to the tiny setup (1000 samples)')
         train_input = train_input.narrow(0, 0, 1000)
         train_target = train_target.narrow(0, 0, 1000)
         test_input = test_input.narrow(0, 0, 1000)
@@ -63,92 +48,20 @@ def load_data(tiny=Config.TINY, normalize=Config.NORMALIZE):
         test_input.sub_(mean).div_(std)
 
     return train_input, train_target, test_input, test_target
- 
-
-class Flatten(nn.Module):
-    def __init__(self):
-        super(Flatten, self).__init__()
-
-    def forward(self, x):
-        x = x.view(-1, x.size(1)*x.size(2)*x.size(3))
-        return x
 
 
-"""
-input:      3x32x32
-
-conv1-1:    16x32x32
-relu
-conv1-2:    16x32x32
-relu
-pool1-1:    16x16x16
-
-conv2-1:    32x16x16
-relu
-conv2-2:    32x16x16
-relu
-pool2-1:    32x8x8
-
-conv3-1:    64x8x8
-relu
-conv3-2:    64x8x8
-relu
-pool3-1:    64x4x4
-
-input2:     1x1024
-fc1:    1024->2048
-fc2:    2048->512
-fc3:    512->10
-"""
-
-
-def create_conv_blocks():
-    return [nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1),
-    nn.ReLU(inplace=True),
-    nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, padding=1),
-    nn.ReLU(inplace=True),
-    nn.MaxPool2d(kernel_size=2, stride=2),
-    nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1),
-    nn.ReLU(inplace=True),
-    nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, padding=1),
-    nn.ReLU(inplace=True),
-    nn.MaxPool2d(kernel_size=2, stride=2),
-    nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
-    nn.ReLU(inplace=True),
-    nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding=1),
-    nn.ReLU(inplace=True),
-    nn.MaxPool2d(kernel_size=2, stride=2)]
-
-
-def create_classifier():
-    return [Flatten(),
-    nn.BatchNorm1d(1024),
-    nn.Linear(1024, 2048),
-    nn.BatchNorm1d(2048),
-    nn.Linear(2048, 512),
-    nn.BatchNorm1d(512),
-    nn.Linear(512, 10)]
-
-
-def create_model():
-    m = create_conv_blocks()
-    m.extend(create_classifier())
-    model = nn.Sequential(*m)
-    return model
-
-  
 def save_model(model, path):
     if not path == None:
         torch.save(model, path)
 
-        
+
 def load_model(path):
     if os.path.exists(path):
         return torch.load(path)
     else:
         return None
 
-      
+
 def train_model(model, train_input, train_target,
                 batch_size=Config.BATCH_SIZE,
                 epochs=Config.EPOCHS,
@@ -182,7 +95,7 @@ def train_model(model, train_input, train_target,
 
         accuracy = 100 - (nb_errors.float() * 100 / train_input.size(0))
         elapsed = datetime.now() - start_time_per_epoch
-        print('[{:5d}] Accuracy: {:3.2f}% - Loss: {:6.2f} - {}'.format(e + 1, accuracy, sum_loss, elapsed))
+        loggin.info('[{:5d}] Accuracy: {:3.2f}% - Loss: {:6.2f} - {}'.format(e + 1, accuracy, sum_loss, elapsed))
     
     if model_path is not None:
         save_model(model, model_path)
@@ -190,7 +103,7 @@ def train_model(model, train_input, train_target,
 
 def compute_nb_errors(model, inputs, targets):
     nb_errors = 0
-    batch_size = inputs.size(0) / 50
+    batch_size = Config.BATCH_SIZE
 
     for b in range(0, inputs.size(0), batch_size):
         batch_inputs = inputs.narrow(0, b, batch_size)
@@ -203,29 +116,32 @@ def compute_nb_errors(model, inputs, targets):
     return nb_errors
 
 
+
 def main():
+    logging.basicConfig(filename=Config.LOG_PATH, format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
     if torch.cuda.is_available():
-        print ("CUDA IS AVAILABLE. USING CUDA")
+        logging.info('CUDA IS AVAILABLE. USING CUDA')
         torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
     # Loading Data
     train_input, train_target, test_input, test_target = load_data()
     train_input, train_target = Variable(train_input), Variable(train_target)
     test_input, test_target = Variable(test_input), Variable(test_target)
-    print('Data Loaded')
+    loggin.info('Data Loaded')
 
     # Creating Model
-    model = create_model()
+    model = mymodels.create_model('v1')
     if torch.cuda.is_available():
         model = model.cuda()
-    print('Model Created')
+    logging.info('Model Created')
 
     start_time = datetime.now()
     train_model(model, train_input, train_target, model_path=Config.MODEL_PATH)
-    print('Elapsed time:', datetime.now() - start_time)
+    logging.info('Elapsed time:', datetime.now() - start_time)
 
     nb_errors = compute_nb_errors(model, test_input, test_target)
-    print ('Test error: {:.02f}% {:d} / {:d}'.format(100*nb_errors.float() / test_input.size(0), nb_errors, test_input.size(0)))
+    loggin.info('Test error: {:.02f}% {:d} / {:d}'.format(100*nb_errors.float() / test_input.size(0), nb_errors, test_input.size(0)))
 
 
 if __name__ == '__main__':
