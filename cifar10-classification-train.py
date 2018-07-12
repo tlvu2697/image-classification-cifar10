@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from torch.nn import functional as F
 from datetime import datetime
 from torchvision import datasets
-from config import config_v2 as Config
+from config import config_v3 as Config
 import model as mymodels
 
 
@@ -68,9 +68,17 @@ def train_model(model, train_input, train_target,
                 eta=Config.ETA,
                 model_path=None):
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=eta)
+    eta = [1e-1, 1e-2, 1e-3]
+    logging.info('Changing ETA = {}'.format(eta[0]))
+    optimizer = optim.SGD(model.parameters(), lr=eta[0])
 
     for e in range(epochs):
+        if e == 100:
+            logging.info('Changing ETA = {}'.format(eta[1]))
+            optimizer = optim.SGD(model.parameters(), lr=eta[1])
+        elif e == 200:
+            logging.info('Changing ETA = {}'.format(eta[2]))
+            optimizer = optim.SGD(model.parameters(), lr=eta[2])
         start_time_per_epoch = datetime.now()
         nb_errors = 0
         sum_loss = 0
