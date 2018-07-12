@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from torch.nn import functional as F
 from datetime import datetime
 from torchvision import datasets
-from config import config_v3 as Config
+from config import config_v4 as Config
 import model as mymodels
 
 
@@ -70,6 +70,7 @@ def train_model(model, train_input, train_target,
     criterion = nn.CrossEntropyLoss()
     if type(eta) == tuple:
         eta_batch = epochs // len(eta)
+        logging.info('ETA BATCH = {}'.format(eta_batch))
     else:
         optimizer = optim.SGD(model.parameters(), lr=eta)
 
