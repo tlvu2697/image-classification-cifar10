@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from torch.nn import functional as F
 from datetime import datetime
 from torchvision import datasets
-from config import config_v1 as Config
+from config import config_v2 as Config
 import model as mymodels
 
 
@@ -132,7 +132,7 @@ def main():
     logging.info('Data Loaded')
 
     # Creating Model
-    model = mymodels.create_model('v1')
+    model = mymodels.create_model('v2')
     if torch.cuda.is_available():
         model = model.cuda()
     logging.info('Model Created')

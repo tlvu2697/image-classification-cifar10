@@ -71,7 +71,7 @@ def create_classifier_v2():
 
 def init_weights(m):
     if type(m) == nn.Linear:
-        torch.nn.init.xavier_uniform_(m.weight)
+        nn.init.xavier_uniform_(m.weight)
 
 
 def create_model(type):
