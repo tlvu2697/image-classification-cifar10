@@ -68,17 +68,17 @@ def train_model(model, train_input, train_target,
                 eta=Config.ETA,
                 model_path=None):
     criterion = nn.CrossEntropyLoss()
-    eta = [1e-1, 1e-2, 1e-3]
-    logging.info('Changing ETA = {}'.format(eta[0]))
-    optimizer = optim.SGD(model.parameters(), lr=eta[0])
+    if type(eta) == tuple:
+        eta_batch = epochs // len(eta)
+    else:
+        optimizer = optim.SGD(model.parameters(), lr=eta)
 
     for e in range(epochs):
-        if e == 100:
-            logging.info('Changing ETA = {}'.format(eta[1]))
-            optimizer = optim.SGD(model.parameters(), lr=eta[1])
-        elif e == 200:
-            logging.info('Changing ETA = {}'.format(eta[2]))
-            optimizer = optim.SGD(model.parameters(), lr=eta[2])
+        if (type(eta) == tuple) and (e % eta_batch == 0):
+            _eta = min(e // eta_batch, len(eta) - 1)
+            logging.info('Changing ETA[{}] = {}'.format(_eta, eta[_eta]))
+            optimizer = optim.SGD(model.parameters(), lr=eta[_eta])
+
         start_time_per_epoch = datetime.now()
         nb_errors = 0
         sum_loss = 0
