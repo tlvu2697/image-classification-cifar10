@@ -24,12 +24,3 @@ class config_v3:
     ETA = (1e-1, 1e-2, 1e-3)
     TINY = False
     NORMALIZE = True
-
-class config_v4:
-    MODEL_PATH = 'trained-model/v4/v4.pth.tar'
-    LOG_PATH = 'trained-model/v4/train-v4.log'
-    BATCH_SIZE = 100
-    EPOCHS = 400
-    ETA = (1e-2, 1e-3, 1e-4, 1e-5)
-    TINY = False
-    NORMALIZE = True
