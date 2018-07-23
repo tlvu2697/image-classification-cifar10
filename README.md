@@ -5,7 +5,7 @@
 
 # Overview
 
-Parameter|v1|v2|v3
+Parameter|**v1**|**v2**|**v3**
 ---|---|---|---
 batch_size|100|100|100
 epochs|100|300|300
@@ -16,6 +16,10 @@ train_accuracy|100%|93%|96.73%
 test_error|29.96%|25.47%|23.9%
 
 
-# Achitecture
-## 1. v1
-<img width=80% src="trained-model/v1/architecture.png">
+# Detail
+Model|Architecture|Note
+---|---|---
+**v1**|![](trained-model/v1/architecture.png)|
+**v2**|![](trained-model/v2/architecture.png)|Replace BatchNorm by Dropout and increase the number of epochs to 300 make the test_error decrease 4.49% compared to the v1 model
+**v3**|![](trained-model/v3/architecture.png)|Train the model with 3 different learning rates at different epochs make the test_error decrease 1.57% compared to the v2 model
+
